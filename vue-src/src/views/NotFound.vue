@@ -1,3 +1,7 @@
+<!--
+  Copyright 2026 Mushu
+  Licensed under the Apache License, Version 2.0. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+-->
 <!--404 页面-->
 <!--未匹配到任何路由时的兜底-->
 <script setup lang="ts">

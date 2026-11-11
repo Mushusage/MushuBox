@@ -1,3 +1,7 @@
+<!--
+  Copyright 2026 Mushu
+  Licensed under the Apache License, Version 2.0. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+-->
 <!--欢迎页面-->
 <!--简短的自我介绍 网站作用等-->
 <!--文章列表已移至 components/Blog.vue-->

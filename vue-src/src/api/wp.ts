@@ -1,13 +1,9 @@
-/**
- * WordPress REST API 基础封装
- *
- * 全部使用 WordPress 自带端点（wp/v2），主题无需自定义 PHP 即可读取内容。
- * 站点同源，所以用相对路径即可；开发时若走 vite 代理也能正常工作。
+/*
+ * Copyright 2026 Mushu
+ * Licensed under the Apache License, Version 2.0. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
  */
-
 const REST = '/wp-json/wp/v2/'
 
-/** 通用 JSON 请求，非 2xx 抛错，便于页面显示错误状态 */
 async function getJson<T>(path: string): Promise<T> {
     const res = await fetch(REST + path)
     if (!res.ok) {
@@ -16,12 +12,24 @@ async function getJson<T>(path: string): Promise<T> {
     return res.json() as Promise<T>
 }
 
-/** WordPress 的字符串都以 { rendered: HTML } 形式返回 */
+/** WordPress 的字符串 */
 export interface WpRendered {
     rendered: string
 }
 
-/** 文章 / 页面的通用结构 */
+/** blog列表项结构  */
+export interface BlogListItem {
+    id: number                  // 文章ID
+    slug: string                // 文章slug
+    title: WpRendered           // 文章标题
+    date: string                // 发表时间
+    author: number              // 作者ID
+    sticky: boolean             // 是否置顶
+    featured_media: number      // 缩略图ID
+    comment_count: string       // 评论数
+}
+
+/** 文章结构 */
 export interface WpPost {
     id: number
     slug: string
@@ -45,6 +53,14 @@ export interface WpComment {
     author_name: string
     date: string
     content: WpRendered
+}
+
+/** 博客列表 */
+export function fetchBlogListItem(perPage= 10 ,page = 1) {
+    const fields = 'id,slug,title,date,author,sticky,featured_media,comment_count'
+    return getJson<BlogListItem[]>(
+        `posts?_fields=${fields}&orderby=date&order=desc&per_page=${perPage}&page=${page}`,
+    )
 }
 
 /** 取文章列表（_embed 顺带把作者名一起返回，省一次请求） */

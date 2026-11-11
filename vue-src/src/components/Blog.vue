@@ -1,41 +1,60 @@
-<!--博客文章列表-->
-<!--从 Welcome.vue 移出，由 App.vue 统一引入-->
+<!--
+  Copyright 2026 Mushu
+  Licensed under the Apache License, Version 2.0. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+-->
+<!--页面详情页-->
+<!--WordPress 页面的固定链接是根下的单段 slug（如 /sample-page/），没有 ID，只能按 slug 查询-->
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
-import { fetchPosts, toInternalPath, type WpPost } from '../api/wp'
+import { ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
+import { fetchPageBySlug, type WpPost } from '../api/wp'
 
-const posts = ref<WpPost[]>([])
+const route = useRoute()
+
+const page = ref<WpPost | null>(null)
+const loading = ref(false)
 const error = ref('')
 
-onMounted(async () => {
+async function load(slug: string) {
+  loading.value = true
+  error.value = ''
+  page.value = null
+
   try {
-    posts.value = await fetchPosts(10)
+    const data = await fetchPageBySlug(slug)
+    if (data) {
+      page.value = data
+    } else {
+      // 查不到说明这个 slug 不是页面，交给 404 提示
+      error.value = '页面不存在'
+    }
   } catch (e) {
-    error.value = e instanceof Error ? e.message : '文章加载失败'
+    error.value = e instanceof Error ? e.message : '页面加载失败'
+  } finally {
+    loading.value = false
   }
-})
+}
+
+watch(
+    () => route.params.slug as string,
+    (slug) => {
+      if (slug) load(slug)
+    },
+    { immediate: true },
+)
 </script>
 
 <template>
-  <section class="blog-list">
-    <h2 class="blog-list__heading">最新文章</h2>
+  <div>
+    <p v-if="loading" class="mx-state">加载中…</p>
 
-    <p v-if="error" class="mx-state mx-state--error">{{ error }}</p>
-    <p v-else-if="posts.length === 0" class="mx-state">还没有文章。</p>
+    <p v-else-if="error" class="mx-state mx-state--error">{{ error }}</p>
 
-    <ul v-else class="blog-list__items">
-      <li v-for="p in posts" :key="p.id" class="blog-list__item mx-card">
-        <RouterLink class="blog-list__link" :to="toInternalPath(p.link)">
-          {{ p.title.rendered }}
-        </RouterLink>
-        <p class="blog-list__meta">{{ p.date.slice(0, 10) }}</p>
-        <p
-          class="blog-list__excerpt"
-          v-html="p.excerpt.rendered"
-        ></p>
-      </li>
-    </ul>
-  </section>
+    <article v-else-if="page">
+      <h1 class="page__title" v-html="page.title.rendered"></h1>
+      <div class="mx-content" v-html="page.content.rendered"></div>
+    </article>
+  </div>
 </template>
 
 <style scoped>

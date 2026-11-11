@@ -1,3 +1,7 @@
+<!--
+  Copyright 2026 Mushu
+  Licensed under the Apache License, Version 2.0. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+-->
 <!-- 页脚组件 -->
 <!-- 关于我 -->
 <!-- 包含ICP备案号 公网安备案号 邮箱地址 Github地址 © 2026 无想的札记 -->
